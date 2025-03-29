@@ -469,3 +469,23 @@ window.addEventListener('unhandledrejection', function(event) {
 window.viewPost = viewPost;
 window.editPost = editPost;
 window.clearImagePreview = clearImagePreview;
+
+//
+
+import { handleLogin } from './auth/login.js'
+import { handleSignup } from './auth/signup.js'
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  
+  const email = document.getElementById('email').value
+  const password = document.getElementById('password').value
+  
+  const result = await handleLogin(email, password)
+  
+  if (result.success) {
+    window.location.href = 'blog.html'
+  } else {
+    document.getElementById('loginError').textContent = result.error
+  }
+})
