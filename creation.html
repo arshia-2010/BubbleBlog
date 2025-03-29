@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Post</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Create New Post</h1>
+        <button id="backBtn">Back to Blog</button>
+    </header>
+    <main>
+        <form id="blogForm" class="blog-form">
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" required>
+            </div>
+            <div class="form-group">
+                <label for="content">Content:</label>
+                <textarea id="content" rows="10" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="image">Upload Image:</label>
+                <input type="file" id="image" accept="image/*">
+                <div class="image-preview" id="imagePreview"></div>
+            </div>
+            <button type="submit">Publish Post</button>
+        </form>
+    </main>
+    <script src="js/script.js"></script>
+</body>
+</html>
