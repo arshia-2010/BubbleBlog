@@ -111,9 +111,9 @@ if __name__ == '__main__':
 
 import os
 import re
-from flask import Flask, request, session, render_template_string, redirect, url_for
+from flask import Flask, request, session, jsonify, send_from_directory
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key')
 
 # ======================
@@ -130,22 +130,19 @@ PASSWORD_RULES = {
 
 MESSAGES = {
     'welcome': "Welcome to BubbleBlog!",
-    'signup_success': "🎉 Account created successfully!",
-    'login_success': "🔓 Login successful!",
-    'logout_success': "👋 You've been logged out",
-    'auth_required': "🔒 Please login to access this page",
+    'signup_success': "Account created successfully!",
+    'login_success': "Login successful!",
+    'logout_success': "You've been logged out",
+    'auth_required': "Please login to access this page",
     'password_errors': {
-        'min_length': f"Password must be at least {PASSWORD_RULES['min_length']} characters",
-        'needs_upper': "Must contain at least one uppercase letter",
-        'needs_lower': "Must contain at least one lowercase letter",
-        'needs_number': "Must contain at least one number",
-        'needs_special': f"Must contain one special character ({PASSWORD_RULES['allowed_special']})"
+        'min_length': f"Must be at least {PASSWORD_RULES['min_length']} characters",
+        'needs_upper': "Requires an uppercase letter",
+        'needs_lower': "Requires a lowercase letter",
+        'needs_number': "Requires a number",
+        'needs_special': f"Requires a special character ({PASSWORD_RULES['allowed_special']})"
     }
 }
 
-# ======================
-# UTILITY FUNCTIONS
-# ======================
 def validate_password(password):
     errors = []
     if len(password) < PASSWORD_RULES['min_length']:
@@ -163,159 +160,82 @@ def validate_password(password):
 # ======================
 # ROUTES
 # ======================
-
 @app.route('/')
-def home():
-    return render_template_string('''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>BubbleBlog</title>
-            <style>
-                body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-                .auth-form { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-                .error { color: red; }
-            </style>
-        </head>
-        <body>
-            <h1>{{ welcome_message }}</h1>
-            
-            {% if 'user' in session %}
-                <p>Welcome back, {{ session.user.email }}!</p>
-                <a href="/dashboard">Go to Dashboard</a>
-                <form action="/logout" method="POST" style="margin-top: 20px;">
-                    <button type="submit">Logout</button>
-                </form>
-            {% else %}
-                <div class="auth-form">
-                    <h2>Login</h2>
-                    <form action="/login" method="POST">
-                        <input type="email" name="email" placeholder="Email" required><br><br>
-                        <input type="password" name="password" placeholder="Password" required><br><br>
-                        <button type="submit">Login</button>
-                    </form>
-                </div>
-                
-                <div class="auth-form">
-                    <h2>Signup</h2>
-                    <form action="/signup" method="POST">
-                        <input type="email" name="email" placeholder="Email" required><br><br>
-                        <input type="password" name="password" placeholder="Password" required><br>
-                        <small>Password requirements: 
-                        <ul>
-                            {% for rule in password_rules.values() %}
-                                <li>{{ rule }}</li>
-                            {% endfor %}
-                        </ul>
-                        </small>
-                        <button type="submit">Signup</button>
-                    </form>
-                </div>
-            {% endif %}
-        </body>
-        </html>
-    ''', welcome_message=MESSAGES['welcome'], password_rules=MESSAGES['password_errors'])
+def serve_index():
+    return send_from_directory('templates', 'index.html')
 
 @app.route('/login', methods=['POST'])
 def login():
-    email = request.form.get('email', '').strip()
-    password = request.form.get('password', '')
+    data = request.get_json()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
     
     errors = validate_password(password)
     if errors:
-        return render_template_string('''
-            <script>
-                alert(`Login Failed:\n\n• {{ errors|join('\\n• ') }}`);
-                window.location.href = "/";
-            </script>
-        ''', errors=errors), 400
+        return jsonify({
+            'status': 'error',
+            'message': 'Login failed - password invalid',
+            'errors': errors,
+            'console': f"console.log('Login attempt failed for {email}')"
+        }), 400
     
     session['user'] = {'email': email}
-    return render_template_string(f'''
-        <script>
-            alert("{MESSAGES['login_success']}");
-            window.location.href = "/dashboard";
-        </script>
-    ''')
+    return jsonify({
+        'status': 'success',
+        'message': MESSAGES['login_success'],
+        'redirect': '/dashboard',
+        'console': f"console.log('Successful login for {email}')"
+    })
 
 @app.route('/signup', methods=['POST'])
 def signup():
-    email = request.form.get('email', '').strip()
-    password = request.form.get('password', '')
+    data = request.get_json()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
     
     errors = validate_password(password)
     if errors:
-        return render_template_string('''
-            <script>
-                alert(`Signup Failed:\n\n• {{ errors|join('\\n• ') }}`);
-                window.location.href = "/";
-            </script>
-        ''', errors=errors), 400
+        return jsonify({
+            'status': 'error',
+            'message': 'Signup failed - password invalid',
+            'errors': errors,
+            'console': f"console.log('Signup attempt failed for {email}')"
+        }), 400
     
     session['user'] = {'email': email}
-    return render_template_string(f'''
-        <script>
-            alert("{MESSAGES['signup_success']}");
-            window.location.href = "/dashboard";
-        </script>
-    ''')
-
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.clear()
-    return render_template_string(f'''
-        <script>
-            alert("{MESSAGES['logout_success']}");
-            window.location.href = "/";
-        </script>
-    ''')
+    return jsonify({
+        'status': 'success',
+        'message': MESSAGES['signup_success'],
+        'redirect': '/dashboard',
+        'console': f"console.log('New account created for {email}')"
+    })
 
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
-        return render_template_string(f'''
-            <script>
-                alert("{MESSAGES['auth_required']}");
-                window.location.href = "/";
-            </script>
-        ''')
-    return render_template_string('''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Dashboard</title>
-            <style>
-                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-            </style>
-        </head>
-        <body>
-            <h1>Welcome to your Dashboard, {{ session.user.email }}!</h1>
-            <p>This is a protected area.</p>
-            <form action="/logout" method="POST">
-                <button type="submit">Logout</button>
-            </form>
-        </body>
-        </html>
-    ''')
+        return jsonify({
+            'status': 'error',
+            'message': MESSAGES['auth_required'],
+            'redirect': '/',
+            'console': "console.log('Unauthorized dashboard access attempt')"
+        }), 401
+    
+    return jsonify({
+        'status': 'success',
+        'user': session['user'],
+        'console': f"console.log('Dashboard accessed by {session['user']['email']}')"
+    })
 
-# ======================
-# ERROR HANDLERS
-# ======================
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template_string('''
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Page Not Found</title>
-        </head>
-        <body>
-            <h1>Page Not Found</h1>
-            <p>The requested URL was not found on this server.</p>
-            <a href="/">Return to Homepage</a>
-        </body>
-        </html>
-    '''), 404
+@app.route('/logout', methods=['POST'])
+def logout():
+    console_msg = f"console.log('User logged out: {session.get('user', {}).get('email', 'unknown')}')"
+    session.clear()
+    return jsonify({
+        'status': 'success',
+        'message': MESSAGES['logout_success'],
+        'redirect': '/',
+        'console': console_msg
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
