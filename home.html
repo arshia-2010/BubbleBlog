@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Welcome to BubbleBlog</h1>
+    {% if 'user' in session %}
+        <p>Logged in as: {{ session.user.email }}</p>
+        <a href="/logout">Logout</a>
+        <form action="/create_post" method="POST">
+            <input type="text" name="title" placeholder="Post Title">
+            <textarea name="content" placeholder="Post Content"></textarea>
+            <button type="submit">Create Post</button>
+        </form>
+    {% else %}
+        <a href="/login">Login</a> | <a href="/signup">Signup</a>
+    {% endif %}
+</body>
+</html>
