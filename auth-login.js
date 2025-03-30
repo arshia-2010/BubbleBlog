@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             alert("Login successful! Redirecting to the blog page...");
-            window.location.href = "blog.html"; // Redirect after successful login
+            window.location.href = "/blog.html"; // Redirect after successful login
 
         } catch (error) {
             console.error("Login error:", error.message);

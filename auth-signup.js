@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             alert("Sign-up successful! Redirecting to the blog page...");
-            window.location.href = "blog.html"; // Redirect after successful sign-up
+            window.location.href = "/blog.html"; // Redirect after successful sign-up
 
         } catch (error) {
             console.error("Sign-up error:", error.message);
