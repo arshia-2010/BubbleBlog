@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BubbleBlog</title>
+    <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,9 +81,12 @@
             background-color: #e8f5e9;
             color: #2e7d32;
         }
-        .error {
+        .error-message {
             background-color: #ffebee;
             color: #d32f2f;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -171,17 +175,19 @@
                     responseMessage.style.display = 'block';
                     
                     if (result.redirect) {
-                        window.location.href = result.redirect;
+                        setTimeout(() => {
+                            window.location.href = result.redirect;
+                        }, 1000);
                     }
                 } else {
                     responseMessage.textContent = `${result.message}: ${result.errors.join(', ')}`;
-                    responseMessage.className = 'error';
+                    responseMessage.className = 'error-message';
                     responseMessage.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Error:', error);
                 responseMessage.textContent = 'An error occurred. Please try again.';
-                responseMessage.className = 'error';
+                responseMessage.className = 'error-message';
                 responseMessage.style.display = 'block';
             }
         });
@@ -193,6 +199,11 @@
                 document.querySelector('.auth-container').dispatchEvent(new Event('submit'));
             }
         });
+
+        // Initial console log
+        console.log('%cBubbleBlog%c Authentication System Ready', 
+            'color: white; background: #4285f4; padding: 2px 5px; border-radius: 3px;', 
+            '');
     </script>
 </body>
 </html>

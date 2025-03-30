@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
 import os
 import re
-from flask import Flask, request, session, jsonify, send_from_directory
+from flask import Flask, request, session, jsonify, send_from_directory, abort
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key')
@@ -160,6 +160,17 @@ def validate_password(password):
 # ======================
 # ROUTES
 # ======================
+@app.route('/favicon.ico')
+def favicon():
+    try:
+        return send_from_directory(
+            os.path.join(app.static_folder, 'images'),
+            'favicon.ico',
+            mimetype='image/vnd.microsoft.icon'
+        )
+    except FileNotFoundError:
+        abort(404)  # Silent fail if no favicon exists
+
 @app.route('/')
 def serve_index():
     return send_from_directory('templates', 'index.html')
@@ -176,7 +187,7 @@ def login():
             'status': 'error',
             'message': 'Login failed - password invalid',
             'errors': errors,
-            'console': f"console.log('Login attempt failed for {email}')"
+            'console': f"console.log('%cLOGIN FAILED%c for {email}: {errors}', 'color: red;', '')"
         }), 400
     
     session['user'] = {'email': email}
@@ -184,7 +195,7 @@ def login():
         'status': 'success',
         'message': MESSAGES['login_success'],
         'redirect': '/dashboard',
-        'console': f"console.log('Successful login for {email}')"
+        'console': f"console.log('%cLOGIN SUCCESS%c for {email}', 'color: green;', '')"
     })
 
 @app.route('/signup', methods=['POST'])
@@ -199,7 +210,7 @@ def signup():
             'status': 'error',
             'message': 'Signup failed - password invalid',
             'errors': errors,
-            'console': f"console.log('Signup attempt failed for {email}')"
+            'console': f"console.log('%cSIGNUP FAILED%c for {email}: {errors}', 'color: red;', '')"
         }), 400
     
     session['user'] = {'email': email}
@@ -207,7 +218,7 @@ def signup():
         'status': 'success',
         'message': MESSAGES['signup_success'],
         'redirect': '/dashboard',
-        'console': f"console.log('New account created for {email}')"
+        'console': f"console.log('%cNEW ACCOUNT%c created for {email}', 'color: blue;', '')"
     })
 
 @app.route('/dashboard')
@@ -217,24 +228,24 @@ def dashboard():
             'status': 'error',
             'message': MESSAGES['auth_required'],
             'redirect': '/',
-            'console': "console.log('Unauthorized dashboard access attempt')"
+            'console': "console.log('%cUNAUTHORIZED%c dashboard access attempt', 'color: orange;', '')"
         }), 401
     
     return jsonify({
         'status': 'success',
         'user': session['user'],
-        'console': f"console.log('Dashboard accessed by {session['user']['email']}')"
+        'console': f"console.log('%cDASHBOARD%c accessed by {session['user']['email']}', 'color: purple;', '')"
     })
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    console_msg = f"console.log('User logged out: {session.get('user', {}).get('email', 'unknown')}')"
+    user_email = session.get('user', {}).get('email', 'unknown')
     session.clear()
     return jsonify({
         'status': 'success',
         'message': MESSAGES['logout_success'],
         'redirect': '/',
-        'console': console_msg
+        'console': f"console.log('%cLOGOUT%c by {user_email}', 'color: gray;', '')"
     })
 
 if __name__ == '__main__':
