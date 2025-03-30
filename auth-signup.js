@@ -9,8 +9,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             // Sign-up logic using Supabase or Firebase
-            const { user, error } = await supabase.auth.signUp({ email, password });
-
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password
+            });
+            
             if (error) {
                 throw new Error(error.message);
             }
