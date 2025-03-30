@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BubbleBlog | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        .dashboard-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dashboard-header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        .logout-btn {
+            background: white;
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            opacity: 0.9;
+        }
+        .dashboard-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .welcome-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 2rem;
+            text-align: center;
+        }
+        .welcome-card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        .user-email {
+            display: inline-block;
+            background: #f1f5f9;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <h1>BubbleBlog Dashboard</h1>
+        <form action="/logout" method="POST">
+            <button type="submit" class="logout-btn">Log Out</button>
+        </form>
+    </header>
+
+    <main class="dashboard-content">
+        <div class="welcome-card">
+            <h2>Welcome back, {{ user.name }}! ✨</h2>
+            <p>You're now logged in to your BubbleBlog account</p>
+            <div class="user-email">{{ user.email }}</div>
+            <p style="margin-top: 1.5rem;">Start creating your first blog post!</p>
+        </div>
+    </main>
+</body>
+</html>

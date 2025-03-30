@@ -107,8 +107,8 @@ def is_authenticated():
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True) '''
 
-#for console.log version
-
+#for console.log version 1 --------------------------------------------------------------------------------------------------
+'''
 import os
 import re
 from flask import Flask, request, session, jsonify, send_from_directory, abort
@@ -249,4 +249,95 @@ def logout():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)'
+    '''
+#------------------------------------------------------------------------------------------------------------------------------------
+
+import os
+from flask import Flask, request, redirect, session, render_template, url_for, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24).hex())  # Secure random key
+
+# In-memory user store (replace with database in production)
+users = {
+    "user@example.com": {
+        "password": generate_password_hash("SecurePassword123!"),
+        "name": "Demo User"
+    }
+}
+
+@app.route('/')
+def home():
+    if 'user' in session:
+        return redirect(url_for('dashboard'))
+    return render_template('index.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.form.get('email', '').strip().lower()
+    password = request.form.get('password', '')
+
+    if not email or not password:
+        flash('Please fill in all fields', 'error')
+        return redirect(url_for('home'))
+
+    user = users.get(email)
+    if not user or not check_password_hash(user['password'], password):
+        flash('Invalid email or password', 'error')
+        return redirect(url_for('home'))
+
+    session['user'] = {
+        'email': email,
+        'name': user['name']
+    }
+    flash(f'Welcome back, {user["name"]}!', 'success')
+    return redirect(url_for('dashboard'))
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    email = request.form.get('email', '').strip().lower()
+    password = request.form.get('password', '')
+    name = request.form.get('name', 'New User').strip()
+
+    if not email or not password:
+        flash('Please fill in all required fields', 'error')
+        return redirect(url_for('home'))
+
+    if email in users:
+        flash('Email already registered', 'error')
+        return redirect(url_for('home'))
+
+    if len(password) < 8:
+        flash('Password must be at least 8 characters', 'error')
+        return redirect(url_for('home'))
+
+    users[email] = {
+        'password': generate_password_hash(password),
+        'name': name
+    }
+
+    session['user'] = {
+        'email': email,
+        'name': name
+    }
+    flash('Account created successfully!', 'success')
+    return redirect(url_for('dashboard'))
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user' not in session:
+        flash('Please login to access this page', 'error')
+        return redirect(url_for('home'))
+    return render_template('dashboard.html', user=session['user'])
+
+@app.route('/logout')
+def logout():
+    if 'user' in session:
+        flash(f'Goodbye, {session["user"]["name"]}!', 'info')
+        session.pop('user')
+    return redirect(url_for('home'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
