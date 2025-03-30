@@ -1,22 +1,26 @@
-import { supabase } from '../supabase/config'
+document.addEventListener("DOMContentLoaded", function () {
+    const loginForm = document.getElementById("login-form");
 
-export async function handleLogin(email, password) {
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
+    loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-    if (error) throw error
-    
-    return {
-      success: true,
-      user: data.user
-    }
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message
-    }
-  }
-}
+        const email = document.getElementById("login-email").value;
+        const password = document.getElementById("login-password").value;
+
+        try {
+            // Login logic using Supabase or Firebase
+            const { user, error } = await supabase.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            alert("Login successful! Redirecting to the blog page...");
+            window.location.href = "blog.html"; // Redirect after successful login
+
+        } catch (error) {
+            console.error("Login error:", error.message);
+            alert("Login failed: " + error.message);
+        }
+    });
+});
