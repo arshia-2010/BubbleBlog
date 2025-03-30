@@ -1,0 +1,6 @@
+[[redirects]]
+
+  from = "/blog"
+  to = "/blog.html"
+  status = 200
+  force = true
