@@ -1,1 +1,2 @@
-# BubbleBlog
+BubbleBlog is an early prototype for a blogging platform. It’s still a work-in-progress — more of a “trial run” — but it’s where I experimented with structuring posts, content flow, and basic UI interactions.
+👉 Even though it’s not production-ready, it reflects my mindset of iterating, testing ideas, and learning by building.
